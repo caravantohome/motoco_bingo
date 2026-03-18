@@ -116,6 +116,20 @@ body{
 .postView{
   font-size:12px;
 }
+#formBox input[type="text"]{
+  width: 100%;        /* 幅いっぱいに広げる */
+  font-size: 12px;    /* 文字を読みやすく */
+  padding: 10px;      /* 入力しやすいパディング */
+  box-sizing: border-box; /* パディング込みで幅調整 */
+}
+#formBox textarea{
+  width: 100%;          /* 横幅いっぱい */
+  height: 100px;        /* 高さを大きめに */
+  font-size: 16px;      /* 文字サイズはそのまま */
+  padding: 10px;        /* 中の余白 */
+  box-sizing: border-box;
+  resize: vertical;     /* ユーザーが高さを変更できる */
+}
 
 .mobileHint{
    display:none; /* PCは非表示 */
@@ -138,8 +152,16 @@ body{
     display:none;
   }
 
-   #formBox{
-    font-size:18px;
+  #formBox{
+    width: 90%;        /* 小さい画面でもはみ出さない */
+    max-width: 300px;  /* 上限を設定 */
+  }
+  #formBox input[type="text"]{
+    font-size: 18px;   /* スマホで大きめに */
+  }
+
+  #formBox textarea{
+    height: 150px; 
   }
   
   .postView{
@@ -195,7 +217,7 @@ body{
 <div id="modal">
   <div id="formBox">
     <div id="cellNumber"></div>
-    <input type="text" id="textInput" placeholder="思い出したことや痕跡など">
+    <textarea id="textInput" placeholder="思い出したことや痕跡など"></textarea>
     <br><br>
     <button id="submitBtn">投稿</button>
     <button id="closeBtn">閉じる</button>
