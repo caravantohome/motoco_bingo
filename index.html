@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  flex-direction: column; 
+  justify-content:center;
+  align-items:center;
+  background:#393939;
+  font-family:sans-serif}
+
+/* テキスト */
+.text{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  height:100%;
+  padding:0 10px;
+  font-weight:bold;
+  font-size:16px;
+  word-break:break-word;
+  overflow:hidden;  /* ←はみ出し隠す */
+  box-sizing:border-box;
+  position:relative;
+
+}
+.fadeText{
+  opacity:0;
+  transform:translateY(10px);
+  transition:all 0.6s ease;
+}
+
+.fadeText.show{
+  opacity:1;
+  transform:translateY(0);
+}
+/* タイトル */
+.grid-title {
+  display: none;       /* デフォルト非表示 */
+  width: 80%;
+  max-width: 300px;
+  margin-bottom: 10px;
+}
+
+/* モバイル版だけ表示 */
+@media (max-width:700px){
+  .grid-title {
+    display: block;
+  }
+}
+
+/* グリッド */
+#grid{
+  width:90vmin;
+  display:grid;
+  grid-template-columns:
+  repeat(3,1fr);
+  gap:0
+}
+
+/* グリッド内セル */
+.cell{
+  aspect-ratio:1/1;
+  min-width:0;   /* ←追加 */
+  min-height:0;
+  border:0;
+  background-color:white;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+
+  padding:0; /* ←ここ重要！ */
+
+  font-weight:bold;
+  font-size:16pt;
+  word-break:break-word;
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+
+  cursor:pointer;
+
+}
+
+
+
+/* 小マスcss */
+.sub{
+  border:0 solid #ddd;
+  overflow:hidden;
+}
+.sub img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity 0.8s;
+}
+.sub img.show{
+  opacity:1;
+}
+
+#modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center}
+#formBox{background:white;padding:20px;width:80%;max-width:300px}
+.postView{
+  font-size:12px;
+}
+
+
+@media (max-width:700px){
+
+  .text{
+    display:none;
+  }
+
+   #formBox{
+    font-size:18px;
+  }
+  
+  .postView{
+    display:none;
+  }
+   .cell{
+    display:block;
+    background-size:cover;
+    background-position:center;
+    border:1px solid #ccc;
+  }
+  .sub{
+    display:none;
+  }
+
+  .cell.my-post {
+    position: relative; /* ←これ重要！親セルを基準にする */
+  }
+  .cell.my-post::after {
+    content: "";
+    position: absolute;
+    inset: 0;               /* 全体を覆う */
+    background: rgba(233, 104, 104, 0.585); /* 半透明で暗く */
+    pointer-events: none;   /* クリックは邪魔しない */
+}
+
+}
+
+
+</style>
+</head>
+
+
+<body>
+  <!-- 全体タイトル（モバイルのみ表示） -->
+  <img src="img/sp_title.png" class="grid-title">
+<div id="grid">
+  <div class="cell" data-cell="1"></div>
+  <div class="cell" data-cell="2"></div>
+  <div class="cell" data-cell="3"></div>
+  <div class="cell" data-cell="4"></div>
+  <div class="cell" data-cell="5"></div>
+  <div class="cell" data-cell="6"></div>
+  <div class="cell" data-cell="7"></div>
+  <div class="cell" data-cell="8"></div>
+  <div class="cell" data-cell="9"></div>
+</div>
+
+<!-- 入力 -->
+<div id="modal">
+  <div id="formBox">
+    <div id="cellNumber"></div>
+    <input type="text" id="textInput" placeholder="思い出したことや痕跡など">
+    <br><br>
+    <button id="submitBtn">投稿</button>
+    <button id="closeBtn">閉じる</button>
+  </div>
+</div>
+
+<!-- スクリプト -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // supabase
+    const sb = window.supabase.createClient(
+     "https://jehhmkbzpkjoqtjuqzss.supabase.co",
+     "sb_publishable_MDH7aCHenj6LTrw4X4rLuA_5VPuOaLF"
+    )
+
+  // 定義
+  let selectedCell = null
+  const cells = document.querySelectorAll(".cell")
+  const modal = document.getElementById("modal")
+  const cellNumber = document.getElementById("cellNumber")
+  let myPosts = JSON.parse(localStorage.getItem("myPosts") || "[]")
+
+  // 背景
+  const backgrounds = {
+  1: "url(img/bg1.png)",
+  2: "url(img/bg2.png)",
+  3: "url(img/bg3.png)",
+  4: "url(img/bg4.png)",
+  5: "url(img/bg5.png)",
+  6: "url(img/bg6.png)",
+  7: "url(img/bg7.png)",
+  8: "url(img/bg8.png)",
+  9: "url(img/bg9.png)"
+  }
+
+  cells.forEach(cell=>{
+    const num = cell.dataset.cell
+
+    if(window.innerWidth <= 700){
+      cell.style.backgroundImage = `url(img/sp_bg${num}.png)`
+    }else{
+      cell.style.backgroundImage = backgrounds[num]
+    }
+
+    const div = document.createElement("div")
+    div.className = "text"
+    cell.appendChild(div)
+  })
+
+  // ランダムに投稿を選ぶ
+  function showRandomPost(){
+    cells.forEach(cell => {
+      const cellNum = cell.dataset.cell
+      const posts = postsByCell[cellNum]
+      if(!posts || posts.length === 0) return
+      const post = posts[Math.floor(Math.random()*posts.length)]
+      const textEl = cell.querySelector(".text")
+      textEl.innerHTML = `<div class="fadeText">${post.text}</div>`
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          textEl.querySelector(".fadeText").classList.add("show")
+        })
+      })
+      const isMobile = window.innerWidth <= 700; // 700px以下はスマホ判定
+
+      if(isMobile){
+        if(myPosts.includes(cellNum)){
+          cell.classList.add("my-post"); // 自分の投稿なら暗くするクラス
+        } else {
+          cell.classList.remove("my-post");
+        }
+      }
+    })
+  }
+
+  cells.forEach(cell=>{
+    cell.onclick = ()=>{
+      selectedCell = cell.dataset.cell
+      cellNumber.innerText = "No."+selectedCell
+      modal.style.display="flex"
+    }
+  })
+
+cells.forEach(cell=>{
+})
+
+document.getElementById("closeBtn").onclick = ()=>{
+  modal.style.display="none"
+}
+
+// 保存
+document.getElementById("submitBtn").onclick = async () => {
+  const input = document.getElementById("textInput")
+  const text = input.value
+  input.value = ""
+
+  const { data, error } = await sb
+    .from("posts")
+    .insert([{ cell: selectedCell, text: text }])
+
+  if(error){
+    alert("保存エラー")
+    console.log(error)
+  } else {
+
+    if(!postsByCell[selectedCell]){
+      postsByCell[selectedCell] = []
+    }
+
+    postsByCell[selectedCell].push({
+      cell:selectedCell,
+      text:text
+    })
+
+    if(!myPosts.includes(selectedCell)){
+      myPosts.push(selectedCell)
+      localStorage.setItem("myPosts", JSON.stringify(myPosts))
+    }
+
+    // 投稿直後に表示
+    const cell = document.querySelector(`.cell[data-cell="${selectedCell}"]`)
+    const textEl = cell.querySelector(".text")
+    textEl.innerHTML = `<div class="fadeText">${text}</div>`
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        textEl.querySelector(".fadeText").classList.add("show")
+      })
+    })
+    modal.style.display="none"
+    if(!myPosts.includes(selectedCell)){
+      myPosts.push(selectedCell)
+      localStorage.setItem("myPosts", JSON.stringify(myPosts))
+    }
+    cell.classList.add("my-post")  // ←追加！
+
+  }
+}
+
+// 投稿を読み込み
+async function loadPosts(){
+
+  const { data, error } = await sb
+    .from("posts")
+    .select("*")
+
+  if(error){
+    console.log(error)
+    return
+  }
+
+  postsByCell = {}
+
+  data.forEach(post=>{
+
+    if(!postsByCell[post.cell]){
+      postsByCell[post.cell] = []
+    }
+
+    postsByCell[post.cell].push(post)
+
+  })
+
+}
+
+let postsByCell = {};
+
+// 投稿を読み込む
+(async function(){
+
+  await loadPosts()
+  showRandomPost()
+
+})()
+
+// ランダム表示10000で10秒
+setInterval(showRandomPost,10000)
+
+</script>
+</body>
+</html>
