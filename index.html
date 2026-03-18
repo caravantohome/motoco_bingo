@@ -117,6 +117,20 @@ body{
   font-size:12px;
 }
 
+.mobileHint{
+   display:none; /* PCは非表示 */
+  position:fixed;  /* 下部に固定 */
+  bottom:30px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:16px;
+  color:white;
+  font-weight:bold;
+  padding:5px 10px;
+  border-radius:5px;
+  pointer-events:none; /* タッチの邪魔しない */
+  z-index:1000;
+}
 
 @media (max-width:700px){
 
@@ -151,6 +165,9 @@ body{
     background: rgba(233, 104, 104, 0.585); /* 半透明で暗く */
     pointer-events: none;   /* クリックは邪魔しない */
 }
+  .mobileHint{
+    display:block; /* スマホで表示 */
+  }
 
 }
 
@@ -160,9 +177,8 @@ body{
 
 
 <body>
-  <!-- 全体タイトル（モバイルのみ表示） -->
   <img src="img/sp_title.png" class="grid-title">
-<div id="grid">
+<div id="grid"> 
   <div class="cell" data-cell="1"></div>
   <div class="cell" data-cell="2"></div>
   <div class="cell" data-cell="3"></div>
@@ -173,6 +189,7 @@ body{
   <div class="cell" data-cell="8"></div>
   <div class="cell" data-cell="9"></div>
 </div>
+<div class="mobileHint">タッチして投稿</div>
 
 <!-- 入力 -->
 <div id="modal">
