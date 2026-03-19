@@ -132,7 +132,7 @@ body{
 }
 
 .mobileHint{
-   display:none; /* PCは非表示 */
+  display:none; /* PCは非表示 */
   position:fixed;  /* 下部に固定 */
   bottom:30px;
   left:50%;
@@ -149,15 +149,15 @@ body{
 @media (max-width:700px){
 
   .text{
-    display:none;
+    font-size:10px; 
   }
-
+  
   #formBox{
     width: 90%;        /* 小さい画面でもはみ出さない */
     max-width: 300px;  /* 上限を設定 */
   }
   #formBox input[type="text"]{
-    font-size: 18px;   /* スマホで大きめに */
+    font-size: 12px;   /* スマホで大きめに */
   }
 
   #formBox textarea{
@@ -184,7 +184,7 @@ body{
     content: "";
     position: absolute;
     inset: 0;               /* 全体を覆う */
-    background: rgba(233, 104, 104, 0.585); /* 半透明で暗く */
+    background: rgba(255, 133, 76, 0.347); /* 半透明で暗く */
     pointer-events: none;   /* クリックは邪魔しない */
 }
   .mobileHint{
